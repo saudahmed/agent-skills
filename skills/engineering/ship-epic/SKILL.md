@@ -91,8 +91,23 @@ Body ≤6 lines. An epic slice always links its parent epic PRD. No file lists o
 6. **Reply, then resolve** the thread — reply first, resolve second. Exact
    commands: [REFERENCE.md](REFERENCE.md#reading-and-resolving-threads).
 
-7. Push the fixes, re-request (back to 2), repeat. **Stop when a pass reports no
-   new findings** — two or three passes is normal.
+7. Push the fixes, re-request (back to 2), repeat — **bounded by the round cap
+   below.**
+
+**Round cap — 3 passes by default (`MAX_REVIEW_ROUNDS`), never more than 5.**
+One pass = one re-request followed by a wait. Stop requesting when either:
+
+- a pass reports **no new findings** (the good case), or
+- you have run **3 passes** (default) — the user may raise `MAX_REVIEW_ROUNDS`
+  for this ship, but treat 5 as the hard ceiling unless a human explicitly says
+  otherwise.
+
+At the cap, **do not re-request and do not keep looping.** Instead: list the
+still-unresolved threads (`scripts/review-threads.sh <PR>`), report how many
+were fixed vs. deferred, and ask the user whether to spend one more pass or
+merge with the remainder triaged. Copilot never approves and a later pass can
+always surface "previously missed" findings, so an unbounded loop does not
+terminate on its own — that is how a ship turns into 12 passes over two hours.
 
 Copilot only posts `COMMENTED`, never `APPROVED` — gate on *zero unresolved threads*. Details: [REFERENCE.md](REFERENCE.md).
 
@@ -107,4 +122,5 @@ git checkout "$EPIC_BRANCH" && git pull --ff-only && git log --oneline -5
 
 `--squash` lands the slice as a single commit on the epic branch; a pending preview deploy is not a gate unless the branch requires status checks.
 
-Report: PR number, the detected base, merge commit, review passes run, findings fixed vs. pushed back.
+Report: PR number, the detected base, merge commit, review passes run vs. the
+cap (`n/3`), findings fixed vs. pushed back, and any threads still open.

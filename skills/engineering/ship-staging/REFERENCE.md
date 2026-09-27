@@ -106,6 +106,13 @@ from one that was dismissed.
 
 ## Gotchas
 
+- **Round cap.** The review loop is bounded at **3 passes** by default
+  (`MAX_REVIEW_ROUNDS`, hard ceiling 5). Copilot never approves, and a later pass
+  can always surface "previously missed" findings in files it skipped before, so
+  "stop when a pass is clean" alone never terminates on a large diff — that is
+  how a ship becomes 12 passes over two hours. At the cap, stop re-requesting,
+  report the remaining unresolved threads, and ask the user before spending
+  another pass.
 - **`COMMENTED`, not `APPROVED`.** Copilot never approves. `reviewDecision` stays
   empty, so gate on unresolved threads plus branch protection, not on approval.
 - **Review passes are cumulative.** A re-request produces a *new* review entry;
