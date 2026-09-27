@@ -1,13 +1,13 @@
 ---
 name: ship-epic
-description: Land the current slice on its parent epic integration branch (`feat/epic-NN-<slug>`) instead of staging — commit, push, open a PR with the epic branch as base, request a GitHub Copilot code review, fix and resolve every review thread, then rebase-merge and delete the branch. Use when the user says "ship to the epic branch", "PR against the epic branch", "land this on feat/epic-NN", or when the branch being shipped is an `issue-*` slice of an epic.
+description: Land the current slice on its parent epic integration branch (`feat/epic-NN-<slug>`) instead of staging — commit, push, open a PR with the epic branch as base, request a GitHub Copilot code review, fix and resolve every review thread, then squash-merge and delete the branch. Use when the user says "ship to the epic branch", "PR against the epic branch", "land this on feat/epic-NN", or when the branch being shipped is an `issue-*` slice of an epic.
 argument-hint: "[optional PR title]"
 disable-model-invocation: true
 ---
 
 # Ship to the epic branch
 
-Take a slice of an epic to a rebase-merged PR on its **epic integration branch**
+Take a slice of an epic to a squash-merged PR on its **epic integration branch**
 (`feat/epic-NN-<slug>`) — not on `staging`, not on `main`. Deliberately
 user-invoked: the last step is a merge.
 
@@ -101,10 +101,10 @@ Copilot only posts `COMMENTED`, never `APPROVED` — gate on *zero unresolved th
 ```bash
 gh pr view <PR> --json mergeable,mergeStateStatus,reviewDecision
 gh api "repos/{owner}/{repo}/branches/$EPIC_BRANCH/protection"   # approval required?
-gh pr merge <PR> --rebase --delete-branch
+gh pr merge <PR> --squash --delete-branch
 git checkout "$EPIC_BRANCH" && git pull --ff-only && git log --oneline -5
 ```
 
-`--rebase` keeps history linear; a pending preview deploy is not a gate unless the branch requires status checks.
+`--squash` lands the slice as a single commit on the epic branch; a pending preview deploy is not a gate unless the branch requires status checks.
 
 Report: PR number, the detected base, merge commit, review passes run, findings fixed vs. pushed back.
